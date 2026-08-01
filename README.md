@@ -18,7 +18,8 @@ Host-specific publication policy remains an extension and is not a universal DGP
 - [DGP Spec](https://github.com/elqora/dgp-spec) owns canonical contracts and fixtures.
 - [DGP Core](https://github.com/elqora/dgp-core) supplies interpretation primitives.
 - [DGP Ordering](https://github.com/elqora/dgp-ordering) consumes published definitions without this dependency.
-- [DGP Workspace](https://github.com/elqora/dgp-workspace) presents validation diagnostics to editors.
+- [DGP Workspace](https://github.com/elqora/dgp-workspace) orchestrates editorial sessions and publication state.
+- [DGP Studio](https://github.com/elqora/dgp-studio) presents diagnostics and publication readiness to editors.
 - [DGP SDK](https://github.com/elqora/dgp-sdk) is the backend protocol reference.
 - [Digital Service Engine](https://github.com/timeax/digital-service-engine) is the legacy migration source and behavioral reference.
 

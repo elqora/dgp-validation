@@ -10,7 +10,7 @@ This repository implements reusable product-definition validation for editorial 
 
 - May depend on sibling `dgp-spec` for contracts and conformance fixtures.
 - May depend on sibling `dgp-core` for framework-neutral graph and resolution primitives.
-- Must not depend on `dgp-ordering`, `dgp-workspace`, React, Studio, or a host application.
+- Must not depend on `dgp-ordering`, `dgp-ordering-form-palette`, `dgp-workspace`, Form Palette, React, Studio, or a host application.
 
 ## Boundaries
 
@@ -26,4 +26,4 @@ This repository implements reusable product-definition validation for editorial 
 - Legacy validation source: `D:\Projects\GitHub\digital-service-ui-builder\src\core\validate`.
 - Studio destination: sibling `../dgp-studio`; code and history migration source: `D:\Projects\GitHub\service-builder`.
 - Backend reference: sibling `../dgp-sdk` at `D:\Projects\GitHub\elqora\digital-goods-protocol\dgp-sdk`.
-- Sibling repositories: `../dgp-spec`, `../dgp-core`, `../dgp-ordering`, `../dgp-workspace`, and `../dgp-studio`.
+- Sibling repositories: `../dgp-spec`, `../dgp-core`, `../dgp-ordering`, `../dgp-ordering-form-palette`, `../dgp-workspace`, and `../dgp-studio`.

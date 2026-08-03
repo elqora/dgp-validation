@@ -25,9 +25,9 @@ This repository validates canonical DGP `ProductDefinition` documents for editor
 
 ## Authority
 
-Ratified `dgp-spec` contracts control validation. Existing SDK and legacy validators are evidence for unratified semantics, not permission to redefine canonical contracts.
+Spec owns shared representation and diagnostic identifiers; SDK owns backend domain semantics; legacy validators supply behavior evidence to retain or improve. Validation owns validation behavior within its boundary and must not redefine shared contracts.
 
-Ratified means the versioned schema, required fixtures, rationale, and stable status are merged into `dgp-spec/main`; released means that ratified Spec version is tagged and published. Validation may implement ratified unreleased contracts, but stable releases require the corresponding released Spec version.
+Ratified means the versioned plain TypeScript contract, required JSON fixtures, rationale, and stable status are merged into `dgp-spec/main`; generated JSON Schemas must also be current once tooling exists. Released means that ratified Spec version is tagged and published. Validation may implement ratified unreleased contracts, but stable releases require the corresponding released Spec version.
 
 ## Change workflow and operations
 
@@ -39,6 +39,7 @@ Ratified means the versioned schema, required fixtures, rationale, and stable st
 ## References
 
 - Spec authority: sibling `../dgp-spec`.
+- Shared-contract guide: sibling `../dgp-spec/CONTRACTS.md`.
 - Optional interpretation dependency: sibling `../dgp-core`.
 - Backend evidence: sibling `../dgp-sdk`.
 - Legacy validation evidence: `D:\Projects\GitHub\digital-service-ui-builder\src\core\validate`.

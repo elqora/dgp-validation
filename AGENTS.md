@@ -27,6 +27,15 @@ This repository validates canonical DGP `ProductDefinition` documents for editor
 
 Ratified `dgp-spec` contracts control validation. Existing SDK and legacy validators are evidence for unratified semantics, not permission to redefine canonical contracts.
 
+Ratified means the versioned schema, required fixtures, rationale, and stable status are merged into `dgp-spec/main`; released means that ratified Spec version is tagged and published. Validation may implement ratified unreleased contracts, but stable releases require the corresponding released Spec version.
+
+## Change workflow and operations
+
+- Update Validation only after Spec ratification and the required Core/SDK conformance work.
+- Commit and release this repository independently before affected higher-level consumers are released.
+- This repository has no implementation manifest or operational commands yet. Do not invent install, test, lint, type-check, build, or generation commands.
+- When its toolchain is introduced, document all real commands, supported runtimes, generated-output policy, completion criteria, and checks for forbidden Ordering/framework dependencies, legacy fields, and diagnostic/fixture drift.
+
 ## References
 
 - Spec authority: sibling `../dgp-spec`.
@@ -36,4 +45,4 @@ Ratified `dgp-spec` contracts control validation. Existing SDK and legacy valida
 - Studio source evidence: `D:\Projects\GitHub\service-builder`; destination: sibling `../dgp-studio`.
 - Siblings: `../dgp-ordering`, `../dgp-ordering-form-palette`, and `../dgp-workspace`.
 
-This repository remains GPL-3.0.
+This repository remains GPL-3.0-only. Future manifests and source headers must use that exact SPDX identifier.

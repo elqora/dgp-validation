@@ -30,4 +30,4 @@ Repository scaffold only. Validation extraction and migration will be planned se
 
 ## License
 
-GPL-3.0.
+GPL-3.0-only.

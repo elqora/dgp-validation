@@ -7,11 +7,65 @@ Ordering does not depend on this package. Customer-facing runtimes consume defin
 ## Responsibilities
 
 - Structural protocol validation against DGP Spec
-- Identity, reference, graph, visibility, effect, service-binding, fallback, and coherence diagnostics
+- Identity, reference, graph, visibility, effect, capability, service-binding, fallback, utility, and coherence diagnostics
 - Stable machine-readable validation results
 - Shared behavior compatible with DGP conformance fixtures
 
 Host-specific publication policy remains an extension and is not a universal DGP rule.
+
+Validation never executes browser JavaScript. Expression declarations are checked by the canonical JSON Schema; runtime execution and structured host-configuration failures belong to Ordering.
+
+## Install
+
+Node.js 22 or newer is required.
+
+```sh
+npm install @elqora/dgp-validation @elqora/dgp-spec @elqora/dgp-core
+```
+
+## Usage
+
+```ts
+import { validateProductDefinition, validateForPublication } from "@elqora/dgp-validation";
+
+const result = validateProductDefinition(input, { services });
+if (!result.valid) {
+  console.error(result.diagnostics);
+}
+
+const publication = validateForPublication(input, {
+  services,
+  policies: [hostPolicy],
+});
+```
+
+Structural failures use stable schema diagnostics and stop semantic interpretation. Structurally valid documents are then checked for:
+
+- duplicate identities and customer-field names;
+- filter hierarchy and binding coherence;
+- relationship, trigger, recursive-option, and effect references;
+- visibility and value-effect dependency cycles;
+- ancestor capability precedence and optional service-catalog fit;
+- fallback node, primary, candidate, duplication, self-reference, and cycle coherence; and
+- separation of advisory utilities from handler service selection.
+
+Supplying a service catalog enables service-reference, capability-fit, and fallback-candidate checks. Rates, final prices, charges, and fulfillment remain handler authority and are not validated here.
+
+Canonical protocol diagnostics and host publication diagnostics remain separate. Host policy codes are not added to Spec's stable DGP code family, and a host policy runs only after universal protocol validation succeeds.
+
+## Development
+
+```sh
+npm install
+npm run lint
+npm run typecheck
+npm test
+npm run check:boundaries
+npm run build
+npm run check
+```
+
+`npm run check` is the repository completion command. It runs linting, strict type checking, tests, dependency/source boundary checks, and the distributable build. `dist/` is generated and not committed.
 
 ## Ecosystem
 
@@ -26,7 +80,7 @@ Host-specific publication policy remains an extension and is not a universal DGP
 
 ## Status
 
-Repository scaffold only. Validation extraction and migration will be planned separately.
+The initial DGP v1 structural and semantic publication-validation slice is implemented against Spec 1.1 and Core 1.x.
 
 ## License
 

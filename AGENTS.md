@@ -33,8 +33,12 @@ Ratified means the versioned plain TypeScript contract, required JSON fixtures, 
 
 - Update Validation only after Spec ratification and the required Core/SDK conformance work.
 - Commit and release this repository independently before affected higher-level consumers are released.
-- This repository has no implementation manifest or operational commands yet. Do not invent install, test, lint, type-check, build, or generation commands.
-- When its toolchain is introduced, document all real commands, supported runtimes, generated-output policy, completion criteria, and checks for forbidden Ordering/framework dependencies, legacy fields, and diagnostic/fixture drift.
+- Supported runtime: Node.js 22 or newer; package manager: npm.
+- Install with `npm install`; run tests with `npm test`, lint with `npm run lint`, strict type checking with `npm run typecheck`, boundary enforcement with `npm run check:boundaries`, and the distributable build with `npm run build`.
+- `npm run check` is the repository completion command and must pass before commit or release.
+- `dist/` is generated and not committed. Validation consumes Spec's committed ProductDefinition JSON Schema and diagnostic types; it does not generate or author shared contracts.
+- The Core dependency is justified only for canonical indexing, recursive-option traversal, graph context, capability inheritance, and service binding. Validation must not duplicate those interpreter rules locally.
+- Boundary enforcement must continue to reject Ordering, UI/framework dependencies, independently authored shared types, and forbidden legacy fields.
 
 ## References
 

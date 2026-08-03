@@ -4,26 +4,36 @@ Read and follow `../AGENTS.md` before working in this repository.
 
 ## Role
 
-This repository implements reusable product-definition validation for editorial tools, backend publication pipelines, CI, and future SDKs.
+This repository validates canonical DGP `ProductDefinition` documents for editorial tools, publication pipelines, CI, backends, and future SDKs. It reports structural and semantic correctness through stable diagnostics.
 
 ## Dependencies
 
-- May depend on sibling `dgp-spec` for contracts and conformance fixtures.
-- May depend on sibling `dgp-core` for framework-neutral graph and resolution primitives.
-- Must not depend on `dgp-ordering`, `dgp-ordering-form-palette`, `dgp-workspace`, Form Palette, React, Studio, or a host application.
+- May depend on sibling `dgp-spec` for contracts, diagnostic identifiers, and conformance fixtures.
+- May depend on sibling `dgp-core` only when a validation rule genuinely requires its framework-neutral graph or resolution primitive; document that justification.
+- Must not depend on Ordering, the Form Palette adapter, Workspace, Studio, React, or a host application.
+- Ordering must never depend on Validation.
 
 ## Boundaries
 
-- Report definition correctness and coherence with structured diagnostics.
-- Validate the declared shape and required metadata of browser JavaScript expressions where specified, but do not make executing JavaScript a cross-language validation requirement.
-- Sibling `dgp-studio` owns interactive expression execution, previews, test cases, and author feedback before publication.
-- Do not perform customer ordering or expose editorial diagnostics to customers.
+- Validate canonical v1 definitions only. Do not accept or convert legacy definitions and do not add aliases, deprecated fields, or compatibility modes.
+- Validate expression declaration shape, required metadata, and declared return expectations without executing browser JavaScript.
+- Report definition correctness and coherence with structured diagnostic codes owned by Spec.
 - Keep host publication policy extensible and separate from universal DGP rules.
-- Do not render diagnostic consoles or other editorial UI.
+- Do not perform customer ordering, advisory utility calculation, pricing, or fulfillment.
+- Do not expose editorial diagnostics to customers or render diagnostic UI.
+- Treat `meta` as an opaque host-owned object; validate only its protocol-level JSON-object shape.
+
+## Authority
+
+Ratified `dgp-spec` contracts control validation. Existing SDK and legacy validators are evidence for unratified semantics, not permission to redefine canonical contracts.
 
 ## References
 
-- Legacy validation source: `D:\Projects\GitHub\digital-service-ui-builder\src\core\validate`.
-- Studio destination: sibling `../dgp-studio`; code and history migration source: `D:\Projects\GitHub\service-builder`.
-- Backend reference: sibling `../dgp-sdk` at `D:\Projects\GitHub\elqora\digital-goods-protocol\dgp-sdk`.
-- Sibling repositories: `../dgp-spec`, `../dgp-core`, `../dgp-ordering`, `../dgp-ordering-form-palette`, `../dgp-workspace`, and `../dgp-studio`.
+- Spec authority: sibling `../dgp-spec`.
+- Optional interpretation dependency: sibling `../dgp-core`.
+- Backend evidence: sibling `../dgp-sdk`.
+- Legacy validation evidence: `D:\Projects\GitHub\digital-service-ui-builder\src\core\validate`.
+- Studio source evidence: `D:\Projects\GitHub\service-builder`; destination: sibling `../dgp-studio`.
+- Siblings: `../dgp-ordering`, `../dgp-ordering-form-palette`, and `../dgp-workspace`.
+
+This repository remains GPL-3.0.

@@ -181,6 +181,12 @@ function validateRelationshipsAndEffects(
         validateFieldReference(index, diagnostics, fieldId, `/filters/${filterIndex}/${mapName}/${targetIndex}`);
       }
     }
+    const included = new Set(filter.includes ?? []);
+    for (const fieldId of filter.excludes ?? []) if (included.has(fieldId)) diagnostics.push(diagnostic(
+      "relationship_conflict", "error", `/filters/${filterIndex}/excludes`,
+      `Filter ${filter.id} both includes and excludes field ${fieldId}.`,
+      { filter_id: filter.id, field_id: fieldId }, [`/filters/${filterIndex}/includes`],
+    ));
   });
 
   for (const [filterId, fieldIds] of Object.entries(definition.order_for_tags)) {
@@ -211,6 +217,19 @@ function validateRelationshipsAndEffects(
           && mapName === "includes_for_buttons") addEdge(visibilityEdges, owner.id, fieldId);
       });
     }
+  }
+  for (const triggerId of new Set([
+    ...Object.keys(definition.includes_for_buttons),
+    ...Object.keys(definition.excludes_for_buttons),
+  ])) {
+    const included = new Set(definition.includes_for_buttons[triggerId] ?? []);
+    for (const fieldId of definition.excludes_for_buttons[triggerId] ?? []) if (included.has(fieldId)) diagnostics.push(diagnostic(
+      "relationship_conflict", "error",
+      `${pointerMapPath("excludes_for_buttons", triggerId)}`,
+      `Trigger ${triggerId} both includes and excludes field ${fieldId}.`,
+      { trigger_id: triggerId, field_id: fieldId },
+      [pointerMapPath("includes_for_buttons", triggerId)],
+    ));
   }
 
   for (const [triggerId, targetRules] of Object.entries(definition.option_effects_for_buttons)) {
@@ -307,6 +326,42 @@ function validateRelationshipsAndEffects(
       }),
     ));
   }
+}
+
+function validateCustomerAndQuantityRules(
+  definition: ProductDefinition,
+  diagnostics: ProductDefinitionDiagnostic[],
+): void {
+  definition.fields.forEach((field, fieldIndex) => {
+    const quantity = field.quantity;
+    if (quantity?.clamp?.min !== undefined && quantity.clamp.max !== undefined && quantity.clamp.min > quantity.clamp.max) {
+      diagnostics.push(diagnostic(
+        "quantity_rule_invalid", "error", `/fields/${fieldIndex}/quantity/clamp`,
+        `Quantity rule for field ${field.id} has clamp min greater than max.`, { field_id: field.id },
+      ));
+    }
+
+    for (const [ruleIndex, rule] of (field.validation ?? []).entries()) {
+      const path = `/fields/${fieldIndex}/validation/${ruleIndex}`;
+      let reason: string | undefined;
+      if (["eq", "neq"].includes(rule.op) && rule.value === undefined) reason = `${rule.op} requires value.`;
+      if (["gt", "gte", "lt", "lte"].includes(rule.op) && typeof rule.value !== "number") reason = `${rule.op} requires a numeric value.`;
+      if (rule.op === "between" && (rule.min === undefined || rule.max === undefined || rule.min > rule.max)) reason = "between requires min less than or equal to max.";
+      if (["in", "nin"].includes(rule.op) && (rule.values?.length ?? 0) === 0) reason = `${rule.op} requires at least one value.`;
+      if (rule.op === "match") {
+        if (rule.pattern === undefined) reason = "match requires pattern.";
+        else {
+          try { new RegExp(rule.pattern, rule.pattern_flags); }
+          catch { reason = "match pattern or pattern_flags is not a valid JavaScript regular expression."; }
+        }
+      }
+      if (reason !== undefined) diagnostics.push(diagnostic(
+        "field_validation_rule_invalid", "error", path,
+        `Validation rule ${ruleIndex} for field ${field.id} is invalid: ${reason}`,
+        { field_id: field.id, rule_index: ruleIndex, operator: rule.op },
+      ));
+    }
+  });
 }
 
 function validateCapabilitiesAndServices(
@@ -508,6 +563,7 @@ export function validateProductDefinitionSemantics(
   validateIdentity(definition, index, diagnostics);
   validateBindingsAndCycles(definition, index, diagnostics);
   validateRelationshipsAndEffects(definition, index, diagnostics);
+  validateCustomerAndQuantityRules(definition, diagnostics);
   validateCapabilitiesAndServices(definition, index, diagnostics, options.services);
   validateFallbacks(definition, index, diagnostics, options.services);
   validateUtilities(definition, index, diagnostics);

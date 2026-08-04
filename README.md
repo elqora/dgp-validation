@@ -44,6 +44,7 @@ Structural failures use stable schema diagnostics and stop semantic interpretati
 - duplicate identities and customer-field names;
 - filter hierarchy and binding coherence;
 - relationship, trigger, recursive-option, and effect references;
+- contradictory visibility relationships and malformed customer-validation or quantity rules;
 - visibility and value-effect dependency cycles;
 - ancestor capability precedence and optional service-catalog fit;
 - fallback node, primary, candidate, duplication, self-reference, and cycle coherence; and
@@ -80,7 +81,7 @@ npm run check
 
 ## Status
 
-The initial DGP v1 structural and semantic publication-validation slice is implemented against Spec 1.1 and Core 1.x.
+The DGP v1 structural and semantic publication-validation slice is implemented against Spec 1.3 and Core 1.x.
 
 ## License
 

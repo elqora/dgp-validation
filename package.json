@@ -1,6 +1,6 @@
 {
   "name": "@elqora/dgp-validation",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Structural and semantic publication validation for Digital Goods Protocol product definitions.",
   "license": "GPL-3.0-only",
   "type": "module",
@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@elqora/dgp-core": "^1.0.0",
-    "@elqora/dgp-spec": "^1.1.0",
+    "@elqora/dgp-spec": "^1.3.0",
     "ajv": "^8.17.1",
     "ajv-formats": "3.0.1"
   },

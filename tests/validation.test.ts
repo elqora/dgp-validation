@@ -130,6 +130,25 @@ describe("identity, graph, and relationship validation", () => {
     });
     expect(codes(source)).toContain("capability_override_ignored");
   });
+
+  it("rejects contradictory relationships and malformed customer or quantity rules", () => {
+    const source = definition();
+    source.filters[0]!.includes = ["field:notes"];
+    source.filters[0]!.excludes = ["field:notes"];
+    source.includes_for_buttons["option:premium"] = ["field:notes"];
+    source.excludes_for_buttons["option:premium"] = ["field:notes"];
+    source.fields[0]!.quantity = { value_by: "value", clamp: { min: 10, max: 1 } };
+    source.fields[0]!.validation = [
+      { op: "between", min: 10, max: 1 },
+      { op: "match", pattern: "[", pattern_flags: "z" },
+      { op: "in", values: [] },
+    ];
+    expect(codes(source)).toEqual(expect.arrayContaining([
+      "relationship_conflict",
+      "quantity_rule_invalid",
+      "field_validation_rule_invalid",
+    ]));
+  });
 });
 
 describe("service, fallback, and utility validation", () => {

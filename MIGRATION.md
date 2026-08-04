@@ -12,5 +12,6 @@ The initial DGP Validation slice retains only legacy checks that remain universa
 | Fallbacks | fallback validation tests | Retain registration reference, primary, duplicate, self-reference, candidate, and cycle coherence. Rates and operational eligibility remain backend concerns. |
 | Utilities | utility validation tests | Retain utility/service-role separation and base-service presence. Exact advisory arithmetic belongs to Ordering. |
 | Expressions | field/quantity validation tests | Validate declaration shape through Spec schema only; never execute JavaScript here. |
+| Customer and quantity rules | legacy field and quantity validation tests | Reject missing operands, invalid regular expressions, inverted ranges/clamps, and contradictory relationships during publication so they never become customer errors. |
 
 Retired from universal validation: custom-component resolution, legacy normalization, `flags`, `estimates`, derived constraint fields, frontend rate authority, Form Palette details, editorial presentation, and customer-facing diagnostics.

@@ -2,8 +2,10 @@
 
 import type {
   HandlerService,
+  FieldRegistryConformanceEntry,
   ProductDefinition,
   ProductDefinitionValidationResult,
+  ServiceRatePolicy,
 } from "@elqora/dgp-spec";
 import { createProductIndex } from "@elqora/dgp-core";
 
@@ -13,6 +15,12 @@ import { validateProductDefinitionStructure } from "./structural.js";
 
 export interface ProductDefinitionValidationOptions {
   services?: readonly HandlerService[];
+  field_registry?: readonly FieldRegistryConformanceEntry[];
+  rate_policy?: ServiceRatePolicy | null;
+  fallback_policy?: {
+    require_capability_fit: boolean;
+    rate_policy: ServiceRatePolicy;
+  } | null;
 }
 
 export interface PublicationValidationOptions extends ProductDefinitionValidationOptions {
@@ -47,7 +55,11 @@ export function validateForPublication(
   if (!protocol.valid) return { protocol, policyDiagnostics: [], publishable: false };
 
   const definition = input as ProductDefinition;
-  const context = { definition, index: createProductIndex(definition) };
+  const context = {
+    definition,
+    index: createProductIndex(definition),
+    ...(options.services === undefined ? {} : { services: options.services }),
+  };
   const policyDiagnostics = (options.policies ?? []).flatMap((policy) =>
     policy.evaluate(context).map((item) => ({
       ...item,

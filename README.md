@@ -35,6 +35,9 @@ if (!result.valid) {
 
 const publication = validateForPublication(input, {
   services,
+  field_registry,
+  rate_policy,
+  fallback_policy,
   policies: [hostPolicy],
 });
 ```
@@ -44,13 +47,33 @@ Structural failures use stable schema diagnostics and stop semantic interpretati
 - duplicate identities and customer-field names;
 - filter hierarchy and binding coherence;
 - relationship, trigger, recursive-option, and effect references;
-- contradictory visibility relationships and malformed customer-validation or quantity rules;
-- visibility and value-effect dependency cycles;
-- ancestor capability precedence and optional service-catalog fit;
-- fallback node, primary, candidate, duplication, self-reference, and cycle coherence; and
-- separation of advisory utilities from handler service selection.
+- contradictory relationships, contextual reachability, co-visible labels, and quantity sources;
+- visibility invalidation and actual value-effect activation cycles;
+- registry type/variant fallback and multi-select support;
+- inherited capabilities, optional service-catalog fit, state, and quantity bounds;
+- contextual rate coherence under a supplied exact policy;
+- fallback registration, cycles, contextual capability fit, and rate eligibility; and
+- advisory utility declarations, service separation, and contextual base-service guards.
 
-Supplying a service catalog enables service-reference, capability-fit, and fallback-candidate checks. Rates, final prices, charges, and fulfillment remain handler authority and are not validated here.
+Supplying a service catalog enables reference, capability, availability, bounds, rate-coherence, and fallback-eligibility checks. These checks validate publication coherence only. Final prices, charges, and fulfillment remain handler authority.
+
+The optional service-policy pack preserves reusable host rules without adding them to the protocol:
+
+```ts
+import {
+  compileServicePublicationPolicies,
+  createServicePublicationPolicies,
+  validateForPublication,
+} from "@elqora/dgp-validation";
+
+const compiled = compileServicePublicationPolicies(rawHostRules);
+const publication = validateForPublication(input, {
+  services,
+  policies: createServicePublicationPolicies(compiled.policies),
+});
+```
+
+Compiled rules support global or visible-group scopes; base, utility, or both roles; filter and field allow-lists; metadata predicates; property projections; equality, uniqueness, boolean, and count operators; and host-selected warning or error severity. Configuration diagnostics remain separate from both protocol and publication results.
 
 Canonical protocol diagnostics and host publication diagnostics remain separate. Host policy codes are not added to Spec's stable DGP code family, and a host policy runs only after universal protocol validation succeeds.
 
@@ -81,7 +104,7 @@ npm run check
 
 ## Status
 
-The DGP v1 structural and semantic publication-validation slice is implemented against Spec 1.3 and Core 1.x.
+The complete DGP v1 structural, semantic, catalog-aware, registry-aware, and optional host-policy migration is implemented against ratified unreleased Spec 1.4 and Core 1.1.
 
 ## License
 

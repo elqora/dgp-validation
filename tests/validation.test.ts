@@ -2,6 +2,10 @@
 
 import validProduct from "@elqora/dgp-spec/fixtures/valid/product-definition.json" with { type: "json" };
 import invalidComponent from "@elqora/dgp-spec/fixtures/invalid/product-definition-component-property.json" with { type: "json" };
+import invalidCamelCase from "@elqora/dgp-spec/fixtures/invalid/product-definition-camel-case-effect.json" with { type: "json" };
+import invalidDerivedCapabilities from "@elqora/dgp-spec/fixtures/invalid/product-definition-derived-capabilities.json" with { type: "json" };
+import invalidExpression from "@elqora/dgp-spec/fixtures/invalid/product-definition-expression-missing-body.json" with { type: "json" };
+import invalidVersion from "@elqora/dgp-spec/fixtures/invalid/product-definition-missing-version.json" with { type: "json" };
 import type { HandlerService, ProductDefinition } from "@elqora/dgp-spec";
 import { describe, expect, it } from "vitest";
 
@@ -56,6 +60,12 @@ describe("structural validation", () => {
     }));
   });
 
+  it("rejects every ratified structurally invalid ProductDefinition fixture", () => {
+    for (const source of [
+      invalidCamelCase, invalidComponent, invalidDerivedCapabilities, invalidExpression, invalidVersion,
+    ]) expect(validateProductDefinition(source).valid).toBe(false);
+  });
+
   it("validates expression declarations without executing their bodies", () => {
     const source = definition();
     source.fields[0]!.quantity = {
@@ -97,18 +107,31 @@ describe("identity, graph, and relationship validation", () => {
     source.fields.push(
       { id: "field:a", type: "button", label: "A", bind_id: "tag:instagram", button: true },
       { id: "field:b", type: "button", label: "B", bind_id: "tag:instagram", button: true },
+      {
+        id: "field:cycle-a", type: "select", label: "Cycle A", bind_id: "tag:instagram",
+        options: [{ id: "option:cycle-a", label: "Cycle A" }],
+      },
+      {
+        id: "field:cycle-b", type: "select", label: "Cycle B", bind_id: "tag:instagram",
+        options: [{ id: "option:cycle-b", label: "Cycle B" }],
+      },
     );
     source.includes_for_buttons["field:a"] = ["field:b"];
-    source.includes_for_buttons["field:b"] = ["field:a"];
+    source.excludes_for_buttons["field:b"] = ["field:a"];
     source.option_effects_for_buttons["option:premium"] = {
       "field:package": { include: ["option:rush"], exclude: ["option:rush", "option:missing"] },
     };
     source.value_effects_for_triggers["field:a"] = { "field:b": { value: "a" } };
     source.value_effects_for_triggers["field:b"] = {
-      "field:a": { value: "b" },
       "field:notes": { value: "first" },
     };
     source.value_effects_for_triggers["option:rush"]!["field:notes"] = { value: "second" };
+    source.value_effects_for_triggers["option:cycle-a"] = {
+      "field:cycle-b": { value: "option:cycle-b" },
+    };
+    source.value_effects_for_triggers["option:cycle-b"] = {
+      "field:cycle-a": { value: "option:cycle-a" },
+    };
 
     const resultCodes = codes(source);
     expect(resultCodes).toEqual(expect.arrayContaining([

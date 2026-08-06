@@ -159,7 +159,7 @@ export function compileServicePublicationPolicies(raw: unknown): {
     const severity = source.severity === "warning" || source.severity === "error" ? source.severity : "error";
     if (source.severity !== undefined && source.severity !== "warning" && source.severity !== "error") warn('Unknown "severity"; defaulted to "error".', "severity");
 
-    const filterIds = stringArray(rawFilter.filter_id ?? rawFilter.tag_id);
+    const filterIds = stringArray(rawFilter.filter_id);
     const fieldIds = stringArray(rawFilter.field_id);
     diagnostics.push(...local);
     if (!local.some((item) => item.severity === "error")) policies.push({
@@ -262,14 +262,15 @@ function collectPolicyItems(context: HostPublicationPolicyContext, rule: Service
     if (rule.filter.role !== "both" && rule.filter.role !== role) return;
     if (rule.filter.filter_id !== undefined && (filterId === undefined || !rule.filter.filter_id.includes(filterId))) return;
     if (rule.filter.field_id !== undefined && (fieldId === undefined || !rule.filter.field_id.includes(fieldId))) return;
+    const service = findService(context.services ?? [], serviceId);
     const item: ServicePolicyItem = {
       ...(filterId === undefined ? {} : { filterId }),
       ...(fieldId === undefined ? {} : { fieldId }),
       nodeId, serviceId, role,
-      service: serviceSnapshot(findService(context.services ?? [], serviceId), serviceId),
+      service: serviceSnapshot(service, serviceId),
       affectedIds: [nodeId, String(serviceId)],
     };
-    if (!matchesWhere(item, rule.filter.where)) return;
+    if (service !== undefined && !matchesWhere(item, rule.filter.where)) return;
     const key = `${String(serviceId)}|${role}`;
     const prior = items.get(key);
     if (prior === undefined) items.set(key, item);
@@ -277,24 +278,33 @@ function collectPolicyItems(context: HostPublicationPolicyContext, rule: Service
   };
 
   if (filterId !== undefined) {
-    for (const filter of context.index.filterLineage(filterId)) if (filter.service_id !== undefined) add(filter.id, filter.service_id, "base");
+    const filter = context.index.getFilter(filterId);
+    if (filter?.service_id !== undefined) add(filter.id, filter.service_id, "base");
   } else for (const filter of context.definition.filters) if (filter.service_id !== undefined) add(filter.id, filter.service_id, "base");
   for (const field of fields) for (const ref of fieldRefs(field)) add(ref.nodeId, ref.serviceId, ref.role, field.id);
 
   if (context.definition.fallbacks !== null) {
     const visibleNodeIds = new Set<string>(filterId === undefined
-      ? [...context.definition.filters.map(({ id }) => id), ...fields.flatMap((field) => [field.id, ...walkFieldOptions(field).map(({ optionId }) => optionId)])]
-      : [filterId, ...fields.flatMap((field) => [field.id, ...walkFieldOptions(field).map(({ optionId }) => optionId)])]);
+      ? [...context.definition.filters.map(({ id }) => id), ...fields.flatMap((field) => walkFieldOptions(field).map(({ optionId }) => optionId))]
+      : [filterId, ...fields.flatMap((field) => walkFieldOptions(field).map(({ optionId }) => optionId))]);
     for (const [nodeId, candidates] of Object.entries(context.definition.fallbacks.nodes ?? {})) {
       if (!visibleNodeIds.has(nodeId)) continue;
       const primary = serviceBindingForNode(context.index, nodeId);
       const primaryItem = primary === undefined ? undefined : [...items.values()].find((item) => String(item.serviceId) === String(primary));
       for (const candidate of candidates) add(nodeId, candidate, primaryItem?.role ?? "base");
     }
-    const primaries = new Set([...items.values()].map((item) => String(item.serviceId)));
-    for (const [primary, candidates] of Object.entries(context.definition.fallbacks.global ?? {})) if (primaries.has(primary)) {
-      const primaryItem = [...items.values()].find((item) => String(item.serviceId) === primary);
-      for (const candidate of candidates) add(`fallback:${primary}`, candidate, primaryItem?.role ?? "base");
+    const visiblePrimaries = new Set<string>();
+    if (filterId === undefined) {
+      for (const primary of Object.keys(context.definition.fallbacks.global ?? {})) visiblePrimaries.add(primary);
+    } else {
+      const filter = context.index.getFilter(filterId);
+      if (filter?.service_id !== undefined) visiblePrimaries.add(String(filter.service_id));
+      for (const field of fields) for (const ref of fieldRefs(field)) visiblePrimaries.add(String(ref.serviceId));
+    }
+    for (const [primary, candidates] of Object.entries(context.definition.fallbacks.global ?? {})) {
+      if (!visiblePrimaries.has(primary)) continue;
+      add(`fallback:${primary}`, primary, "base");
+      for (const candidate of candidates) add(`fallback:${primary}`, candidate, "base");
     }
   }
   return [...items.values()];
@@ -312,8 +322,21 @@ export function createServicePublicationPolicies(rules: readonly ServicePublicat
       const scopes = rule.scope === "global" ? [{ path: "/", filterId: undefined }]
         : context.definition.filters.map((filter, index) => ({ path: `/filters/${index}`, filterId: filter.id }));
       return scopes.flatMap(({ path, filterId }) => {
-        const items = collectPolicyItems(context, rule, filterId);
-        if (items.length === 0 || evalPolicy(rule, items.map((item) => getByPath(item, rule.projection)))) return [];
+        let items = collectPolicyItems(context, rule, filterId);
+        if (rule.scope === "global" && rule.filter.filter_id !== undefined) {
+          const merged = new Map<string, ServicePolicyItem>();
+          for (const allowedFilterId of rule.filter.filter_id) {
+            for (const item of collectPolicyItems(context, rule, allowedFilterId)) {
+              const key = `${String(item.serviceId)}|${item.role}`;
+              const prior = merged.get(key);
+              if (prior === undefined) merged.set(key, item);
+              else prior.affectedIds = [...new Set([...prior.affectedIds, ...item.affectedIds])];
+            }
+          }
+          items = [...merged.values()];
+        }
+        if (rule.scope === "visible_group" && items.length === 0) return [];
+        if (evalPolicy(rule, items.map((item) => getByPath(item, rule.projection)))) return [];
         return [{
           code: "host_service_policy_violation", severity: rule.severity, path,
           message: rule.message ?? rule.label,

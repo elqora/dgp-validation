@@ -42,8 +42,8 @@
     "prepack": "npm run check"
   },
   "dependencies": {
-    "@elqora/dgp-core": "github:elqora/dgp-core#e7896ff",
-    "@elqora/dgp-spec": "github:elqora/dgp-spec#dd8bb21",
+    "@elqora/dgp-core": "github:elqora/dgp-core#bb06a70",
+    "@elqora/dgp-spec": "github:elqora/dgp-spec#de710c0",
     "ajv": "^8.17.1",
     "ajv-formats": "3.0.1"
   },

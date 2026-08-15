@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@elqora/dgp-core": "github:elqora/dgp-core#bb06a70",
-    "@elqora/dgp-spec": "github:elqora/dgp-spec#de710c0",
+    "@elqora/dgp-spec": "github:elqora/dgp-spec#6300c59",
     "ajv": "^8.17.1",
     "ajv-formats": "3.0.1"
   },
